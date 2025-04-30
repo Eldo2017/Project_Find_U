@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "react-native-geolocation-service": "^5.3.1",
+    "react-native-vision-camera": "^4.6.4"
+  }
+}

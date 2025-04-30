@@ -1,32 +1,32 @@
 //Components/LocationTracker.js
 import React, {useEffect, useState} from 'react'
-import {View, Text, StyleSheet} from 'react-native'
-import Geolocation from '@react-native-geolocation-service'
+import {Text} from 'react-native'
+import * as location from 'expo-location';
 
-const LocationTracker=()=>{
-    const [location, setLocation] = useState(null);
-
+const LocationTracker=({itemId, finderId})=>{
     useEffect(() => {
-        Geolocation.getCurrentPosition(
-            pos => {
-                const crd=pos.coords;
-                setLocation(crd);
-            },
-            err=>console.warn(err.message),
-            {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000}
-        );
+        (async()=>{
+            const {status}=await location.requestForegroundPermissionAsync();
+            if(status!='granted') return;
+
+            const loc = await location.getCurrentPositionAsync({});
+            const body={
+                itemId,
+                finder: finderId,
+                latitude: loc.coords.latitude,
+                longitude: loc.coords.longitude
+            };
+
+            fetch('http://your-server.com/api/locations',{
+                method: 'POST',
+                headers:{'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
+            });
+        })();
     },[]);
 
-    return (
-        <View style = {styles.container}>
-            {location ? (
-                <Text>위도: {location.latitude}, 경도: {location.longitude}</Text>
-            ) : (
-                <Text>위치 정보를 가져오고 있습니다.</Text>
-            )}
-        </View>
-    );
-};
+    return <Text>위치 전송 중...</Text>;
+};  
 
 const styles = StyleSheet.create({
     container:{padding:16},

@@ -1,29 +1,30 @@
 // components/QRScanner.js
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet} from 'react-native';
-import {RNCamera}from 'react-native-vision-camera';
+import {Camera} from 'expo-camera';
 
-const QRScanner=()=>{
-    const [scannedData, setScannedData]=useState('');
+const QRScanner=({onScanned})=>{
+    const [hasPermission, setPermission]=useState(null);
     
-    const onBarcodeRead = (e)=>{
-        setScannedData(e.data);
-    };
+    useEffect(()=>{
+        (async()=>{
+            const {status}=await Camera.requestCameraPermissionㄴㄴAsync();
+            setPermission(status=='granted');
+        })();
+    }, []);
+
+    if(hasPermission==null) return <Text>카메라 권한 요청 중...</Text>;
+    if(hasPermission==false) return <Text>카메라 권한이 없습니다</Text>;
 
     return (
-        <View style={styles.container}>
-            <RNCamera
+        <Camera
             style={styles.camera}
-            onBarcodeRead={onBarcodeRead}
-            captureAudio={false}
-            />
-            <Text>Scanned: {scannedData}</Text>
-        </View>
+            onBarcodeScanned={({data})=>onScanned(data)}
+        />
     );
 };
 
 const styles=StyleSheet.create({
-    container:{flex:1},
     camera:{flex:1},
 });
 
